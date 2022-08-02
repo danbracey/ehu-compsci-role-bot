@@ -19,6 +19,11 @@ dotenv.config()
 });**/
 
 
+/*
+    For the next person that has the misfortune of working on this bot.
+    Samaritans UK: 116 123
+ */
+
 const client = new DiscordJS.Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 })
@@ -61,32 +66,7 @@ client.on('interactionCreate', async (interaction) => {
             await interaction.deferReply(true).then(async (deferred) => {
                 let role = interaction.guild.roles.cache.get(interaction.values[0]);
                 console.log("Deferred Reply");
-
-                console.log("Removing user's other roles")
-                //Remove any other roles once the reply has been sent to user (to avoid timeout)
-                let del = interaction.guild.roles.cache.filter(role => role.color === 3066993)
-                del.forEach(function (element) {
-                    interaction.guild.members.cache.get(interaction.user.id).roles.remove(element.id);
-                });
-
-                if (interaction.customId === 'courseSelect') {
-                    let del = interaction.guild.roles.cache.filter(role => role.color === 3066993)
-                    del.forEach(function (element) {
-                        interaction.guild.members.cache.get(interaction.user.id).roles.remove(element.id);
-                    });
-                }
-                if (interaction.customId === 'yearSelect') {
-                    let del = interaction.guild.roles.cache.filter(role => role.color === 15277667)
-                    del.forEach(function (element) {
-                        interaction.guild.members.cache.get(interaction.user.id).roles.remove(element.id);
-                    });
-                }
-                console.log("Removed user's other roles")
-
-                //Add user to role
-                console.log("Adding user to role");
-                await interaction.guild.members.cache.get(interaction.user.id).roles.add(interaction.values[0]);
-                console.log("User added to role");
+                console.log("Removed user's previous courses")
 
                 //Check for compulsory modules
                 let count = 0;
@@ -97,20 +77,29 @@ client.on('interactionCreate', async (interaction) => {
 
                 //Check for optional modules
                 if (interaction.customId === 'courseSelect') {
-
                     optional = await getOptionalModules(interaction.values[0], interaction)
+                }
+
+                if (interaction.customId === 'yearSelect') {
+                    interaction.guild.members.cache.get(interaction.user.id).roles.add(interaction.values[0]).catch(e => {console.log(e)});
+                    let del = interaction.guild.roles.cache.filter(role => role.color === 15277667)
+                    del.forEach(function (element) {
+                        if(element.id !== interaction.values[0]) { //Don't remove the role the user has selected
+                            interaction.guild.members.cache.get(interaction.user.id).roles.remove(element.id);
+                        }
+                    });
                 }
 
                 if(count > 0) {
                     if(optional) { //Optional Modules were found
                         interaction.editReply({
-                            content: "You have been added to the " + role.name + " group! (" + count + " associated modules with your course were automatically added to your account).\n" +
+                            content: "You have been added to the " + role.name + " group! " + count + " associated modules with your course were automatically added to your account.\n" +
                                 "It seems we found some optional modules for you. Please click the buttons below for any modules you wish to add.",
                             components: [optional]
                         })
                     } else {
                         interaction.editReply({
-                            content: "You have been added to the " + role.name + " group! (" + count + " associated modules with your course were automatically added to your account).",
+                            content: "You have been added to the " + role.name + " group! (" + count + " associated modules with your course were automatically added to your account). No optional modules were found."
                         })
                     }
                 } else {
@@ -132,7 +121,8 @@ client.on('interactionCreate', async (interaction) => {
         } else {
             interaction.deferReply().then(async (deferred) => {
                 console.log("Adding module to user");
-                await interaction.guild.members.cache.get(interaction.user.id).roles.add(split[1]);
+                interaction.guild.members.cache.get(interaction.user.id).roles.add(split[1]).catch(console.error);
+                //await interaction.guild.members.cache.get(interaction.user.id).roles.add(split[1]);
                 console.log("Module added to user");
 
                 interaction.editReply({
@@ -174,15 +164,12 @@ async function courses(interaction) {
         });
 
         const questionEmbed = new MessageEmbed()
-            .setColor('#0099ff')
+            .setColor('#5f295f')
             //.setTitle("Please choose your course")
-            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus'})
+            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus/ehu-compsci-role-bot'})
             .setDescription("Welcome to EHU Computer Science. Please select your course.")
             .setTimestamp()
             .setFooter({text: "Made by Dan Bracey"});
-
-        //Log the info into the console for debugging purposes
-        //console.info(interaction.user.username + " has requested question " + data.id + " in server " + interaction.guild.name)
 
         await interaction.reply({
             embeds: [questionEmbed],
@@ -230,9 +217,9 @@ function yearOfStudy(interaction) {
         });
 
         const questionEmbed = new MessageEmbed()
-            .setColor('#0099ff')
+            .setColor('#5f295f')
             //.setTitle("Please choose your course")
-            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus'})
+            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus/ehu-compsci-role-bot'})
             .setDescription("Please select your year of study (or the year you'll be going into)")
             .setTimestamp()
             .setFooter({text: "Made by Dan Bracey"});
@@ -283,9 +270,9 @@ async function accommodation(interaction) {
         });
 
         const questionEmbed = new MessageEmbed()
-            .setColor('#0099ff')
+            .setColor('#5f295f')
             //.setTitle("Please choose your course")
-            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus'})
+            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus/ehu-compsci-role-bot'})
             .setDescription("Please select your accommodation")
             .setTimestamp()
             .setFooter({text: "Made by Dan Bracey"});
@@ -375,9 +362,9 @@ try {
         });
 
         const questionEmbed = new MessageEmbed()
-            .setColor('#0099ff')
+            .setColor('#5f295f')
             .setTitle("Please choose your modules")
-            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus'})
+            .setAuthor({name: 'EHU Computer Science', url: 'https://github.com/PenguinNexus/ehu-compsci-role-bot'})
             .setDescription("Please select each module from the drop-down list individually. Available modules listed below are based on your year group. Use /year or go to https://ehu-discord.herokuapp.com to change this.")
             .setTimestamp()
             .setFooter("Made by Dan Bracey");
