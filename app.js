@@ -118,16 +118,24 @@ client.on('interactionCreate', async (interaction) => {
                 .setColor("RED");
             return interaction.reply({ embeds: [embed], ephemeral: true });
         } else {
-            interaction.deferReply().then(async (deferred) => {
-                console.log("Adding module to user");
-                interaction.guild.members.cache.get(interaction.user.id).roles.add(split[1]).catch(console.error);
-                //await interaction.guild.members.cache.get(interaction.user.id).roles.add(split[1]);
-                console.log("Module added to user");
+            try {
+                interaction.deferReply().then(async (deferred) => {
+                    console.log("Adding module to user");
+                    interaction.guild.members.cache.get(interaction.user.id).roles.add(split[1]).catch(console.error);
+                    //await interaction.guild.members.cache.get(interaction.user.id).roles.add(split[1]);
+                    console.log("Module added to user");
 
+                    interaction.editReply({
+                        content: "Module added to your account!",
+                        ephemeral: true
+                    })
+                });
+            } catch (exception) {
                 interaction.editReply({
-                    content: "Module added to your account!"
+                    content: "There seems to have been an error. Please use https://ehu-discord.herokuapp.com instead",
+                    ephemeral: true
                 })
-            });
+            }
         }
     }
 });
