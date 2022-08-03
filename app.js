@@ -9,15 +9,14 @@ import * as Sentry from "@sentry/node";
 import {getAssociatedModules, getOptionalModules} from './functions.js';
 dotenv.config()
 
-/**Sentry.init({
+Sentry.init({
     dsn: process.env.SENTRY_DSN,
 
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
-});**/
-
+});
 
 /*
     For the next person that has the misfortune of working on this bot.
